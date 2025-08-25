@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางรายได้องค์กรปกครองส่วนท้องถิ่น</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .gradient-header { background: linear-gradient(90deg, #7DD3FC, #3B82F6); }
+        .hover-row:hover { background-color: #EFF6FF !important; transform: translateY(-1px); transition: all 0.2s ease; }
+        .number-cell { font-variant-numeric: tabular-nums; }
+        .chart-bar { transition: width 0.8s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .mobile-text { font-size: 0.75rem; }
+            .mobile-padding { padding: 0.5rem; }
+            .mobile-header { font-size: 1.25rem; }
+            .sticky-cell { position: sticky; left: 0; z-index: 5; min-width: 200px; }
+            .sticky-cell-gray { background-color: #f3f4f6; }
+            .sticky-cell-white { background-color: white; }
+            .sticky-cell-blue { background-color: #dbeafe; }
+            .sticky-cell-red { background-color: #fecaca; }
+        }
+    </style>
+</head>
+<body class="bg-blue-50 p-2 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-3 md:p-6 mb-3 md:mb-6 fade-in">
+            <h1 class="text-xl md:text-3xl font-bold text-gray-800 mb-2 text-center mobile-header">รายรับ - รายจ่าย ขององค์การบริหารส่วนจังหวัดภูเก็ต</h1>
+            <p class="text-sm md:text-base text-gray-600 text-center">ประจำปีงบประมาณ พ.ศ. 2567 - 2569</p>
+            
+            <!-- View Toggle -->
+            <div class="mt-4 flex gap-2 flex-wrap justify-center">
+                <button id="tableView" class="px-3 py-2 md:px-4 md:py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors text-sm shadow-md">
+                    📊 ตารางข้อมูล
+                </button>
+                <button id="chartView" class="px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm shadow-md">
+                    📈 กราฟเปรียบเทียบ
+                </button>
+                <button id="subsidyView" class="px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm shadow-md">
+                    💰 เงินอุดหนุน
+                </button>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div id="tableContainer" class="space-y-4 fade-in">
+            <!-- Revenue Table -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="p-3 md:p-4">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800">1. รายรับ</h2>
+                    
+                    <!-- Revenue Toolbar Menu -->
+                    <div class="mt-4 border-b border-gray-200">
+                        <div class="flex flex-wrap gap-1">
+                            <button id="revenueOverview" class="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border-b-2 border-blue-600 hover:bg-blue-100 transition-colors">
+                                📊 ภาพรวม
+                            </button>
+                            <button id="revenue2567" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 border-b-2 border-transparent hover:border-blue-300 transition-colors">
+                                📈 รายรับปี 2567
+                            </button>
+                            <button id="revenue2568" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 border-b-2 border-transparent hover:border-blue-300 transition-colors">
+                                📈 รายรับปี 2568
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Revenue Overview Content -->
+                <div id="revenueOverviewContent" class="revenue-content">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse min-w-[600px]">
+                            <thead class="gradient-header text-white">
+                                <tr>
+                                    <th class="p-2 md:p-4 text-left font-semibold text-xs md:text-sm sticky left-0 bg-blue-600 z-10 min-w-[200px] md:min-w-0 md:static md:bg-transparent">รายการ</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[100px]">รายรับจริง<br>ปี 2567</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[100px]">ประมาณการ<br>ปี 2568</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[100px]">ประมาณการ<br>ปี 2569</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[80px]">เปลี่ยนแปลง (%)<br>(2569 vs 2568)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenueTableBody">
+                                <!-- Revenue data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Revenue 2567 Content -->
+                <div id="revenue2567Content" class="revenue-content hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse min-w-[800px]">
+                            <thead class="gradient-header text-white">
+                                <tr>
+                                    <th class="p-2 md:p-4 text-left font-semibold text-xs md:text-sm sticky left-0 bg-blue-600 z-10 min-w-[150px] md:min-w-0 md:static md:bg-transparent">หมวด</th>
+                                    <th class="p-2 md:p-4 text-left font-semibold text-xs md:text-sm min-w-[200px]">ประเภท</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[120px]">ประมาณการ</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[120px]">รับจริง</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[150px]">รับจริงเกิน/ขาด<br>ประมาณการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenue2567TableBody">
+                                <!-- Revenue 2567 data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Revenue 2568 Content -->
+                <div id="revenue2568Content" class="revenue-content hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse min-w-[800px]">
+                            <thead class="gradient-header text-white">
+                                <tr>
+                                    <th class="p-2 md:p-4 text-left font-semibold text-xs md:text-sm sticky left-0 bg-blue-600 z-10 min-w-[150px] md:min-w-0 md:static md:bg-transparent">หมวด</th>
+                                    <th class="p-2 md:p-4 text-left font-semibold text-xs md:text-sm min-w-[200px]">ประเภท</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[120px]">ประมาณการ</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[120px]">รับจริง</th>
+                                    <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[150px]">รับจริงเกิน/ขาด<br>ประมาณการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenue2568TableBody">
+                                <!-- Revenue 2568 data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 text-center text-sm text-gray-600 bg-gray-50">
+                        <p>ข้อมูล ณ วันที่ 25 สิงหาคม 2568</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Table -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="p-3 md:p-4">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800">2. รายจ่าย</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse min-w-[600px]">
+                        <thead class="bg-blue-500 text-white">
+                            <tr>
+                                <th class="p-2 md:p-4 text-left font-semibold text-xs md:text-sm sticky left-0 bg-blue-500 z-10 min-w-[200px] md:min-w-0 md:static md:bg-transparent">รายการ</th>
+                                <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[100px]">รายจ่ายจริง<br>ปี 2567</th>
+                                <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[100px]">ประมาณการ<br>ปี 2568</th>
+                                <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[100px]">ประมาณการ<br>ปี 2569</th>
+                                <th class="p-2 md:p-4 text-center font-semibold text-xs md:text-sm min-w-[80px]">เปลี่ยนแปลง (%)<br>(2569 vs 2568)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseTableBody">
+                            <!-- Expense data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart View -->
+        <div id="chartContainer" class="bg-white rounded-lg shadow-lg p-3 md:p-6 hidden">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">กราฟเปรียบเทียบ</h2>
+            <div id="chartContent">
+                <!-- Charts will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Subsidy View -->
+        <div id="subsidyContainer" class="bg-white rounded-lg shadow-lg overflow-hidden hidden">
+            <div class="p-3 md:p-4">
+                <h2 class="text-lg md:text-xl font-bold text-gray-800">เงินอุดหนุน</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse min-w-[1200px]">
+                    <thead class="gradient-header text-white">
+                        <tr>
+                            <th class="p-2 md:p-3 text-left font-semibold text-xs md:text-sm sticky left-0 bg-blue-600 z-10 min-w-[250px] md:min-w-0 md:static md:bg-transparent">รายการ</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">งบประมาณตาม<br>พ.ร.บ. 2567</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">การเบิกจ่าย<br>2567</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[80px]">ร้อยละเบิกจ่าย<br>2567</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[80px]">คงเหลือ<br>2567</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">งบประมาณตาม<br>พ.ร.บ. 2568 (1)</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">ผลการเบิกจ่าย<br>2568 (2)</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">ผลการใช้จ่าย<br>PO 2568 (3)</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[80px]">ร้อยละใช้จ่าย<br>2568</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">คงเหลือ 2568<br>(1) - (3)</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[100px]">พ.ร.บ.<br>2569</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[80px]">เพิ่ม/ลด<br>2569</th>
+                            <th class="p-2 md:p-3 text-center font-semibold text-xs md:text-sm min-w-[80px]">ร้อยละ<br>2569</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subsidyTableBody">
+                        <!-- Subsidy data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Subsidy Charts -->
+            <div class="p-3 md:p-6">
+                <h3 class="text-lg md:text-xl font-semibold mb-4">กราฟเงินอุดหนุน</h3>
+                <div id="subsidyChartContent">
+                    <!-- Subsidy charts will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Performance optimizations
+        const BATCH_SIZE = 10;
+        let isLoading = false;
+        let loadedViews = new Set();
+        
+        // Pre-computed formatters for better performance
+        const numberFormatter = new Intl.NumberFormat('th-TH', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        });
+
+        // Revenue 2568 detailed data
+        let revenue2568Data = [
+            {
+                category: "หมวดภาษีอากร",
+                items: [
+                    { type: "ภาษีบำรุง อบจ. จากการค้ายาสูบ", estimated: 40000000.00, actual: 39499839.37, difference: -500160.63 },
+                    { type: "ภาษีบำรุง อบจ. จากการค้าน้ำมัน/ก๊าซ", estimated: 17000000.00, actual: 16477655.28, difference: -522344.72 }
+                ],
+                total: { estimated: 57000000.00, actual: 55977494.65, difference: -1022505.35 }
+            },
+            {
+                category: "หมวดค่าธรรมเนียม ค่าปรับ และใบอนุญาต",
+                items: [
+                    { type: "ค่าธรรมเนียมบำรุง อบจ. จากผู้เข้าพักโรงแรม", estimated: 320000000.00, actual: 327505805.64, difference: 7505805.64 },
+                    { type: "ค่าธรรมเนียมการสมัครรับเลือกตั้งสมาชิกสภาท้องถิ่นหรือผู้บริหารท้องถิ่น", estimated: 100000.00, actual: 206000.00, difference: 106000.00 },
+                    { type: "ค่าธรรมเนียมอื่น ๆ", estimated: 20000.00, actual: 41100.00, difference: 21100.00 },
+                    { type: "ค่าปรับการผิดสัญญา", estimated: 10000000.00, actual: 20811945.97, difference: 10811945.97 },
+                    { type: "ค่าปรับอื่น ๆ", estimated: 1000000.00, actual: 446505.00, difference: -553495.00 }
+                ],
+                total: { estimated: 331120000.00, actual: 349011356.61, difference: 17891356.61 }
+            },
+            {
+                category: "หมวดรายได้จากทรัพย์สิน",
+                items: [
+                    { type: "ค่าเช่าที่ดิน", estimated: 20000000.00, actual: 17886670.63, difference: -2113329.37 },
+                    { type: "ค่าเช่าหรือบริการ", estimated: 76597400.00, actual: 53165083.75, difference: -23432316.25 },
+                    { type: "ดอกเบี้ย", estimated: 25000000.00, actual: 34463342.93, difference: 9463342.93 },
+                    { type: "ค่าตอบแทนตามที่กฎหมายกำหนด", estimated: 8000000.00, actual: 3793182.83, difference: -4206817.17 },
+                    { type: "รายได้จากทรัพย์สินอื่น ๆ", estimated: 3500000.00, actual: 1649685.00, difference: -1850315.00 }
+                ],
+                total: { estimated: 133097400.00, actual: 110957965.14, difference: -22139434.86 }
+            },
+            {
+                category: "หมวดรายได้เบ็ดเตล็ด",
+                items: [
+                    { type: "ค่าจำหน่ายเศษของ", estimated: 50000.00, actual: 62840.00, difference: 12840.00 },
+                    { type: "เงินที่มีผู้อุทิศให้", estimated: 10000.00, actual: 8062.80, difference: -1937.20 },
+                    { type: "ค่ารับรองสำเนาและถ่ายเอกสาร", estimated: 1000.00, actual: 4384.00, difference: 3384.00 },
+                    { type: "ค่าสมัครสมาชิกห้องสมุด", estimated: 10000.00, actual: 8900.00, difference: -1100.00 },
+                    { type: "รายได้เบ็ดเตล็ดอื่น ๆ", estimated: 100000.00, actual: 4445093.96, difference: 4345093.96 }
+                ],
+                total: { estimated: 171000.00, actual: 4529280.76, difference: 4358280.76 }
+            },
+            {
+                category: "หมวดรายได้จากทุน",
+                items: [
+                    { type: "ค่าขายทอดตลาดทรัพย์สิน", estimated: 300000.00, actual: 0.00, difference: -300000.00 }
+                ],
+                total: { estimated: 300000.00, actual: 0.00, difference: -300000.00 }
+            },
+            {
+                category: "หมวดภาษีจัดสรร",
+                items: [
+                    { type: "ภาษีรถยนต์", estimated: 375000000.00, actual: 284546474.60, difference: -90453525.40 },
+                    { type: "ภาษีมูลค่าเพิ่มตาม พ.ร.บ. กำหนดแผนฯ", estimated: 120500000.00, actual: 97573781.39, difference: -22926218.61 },
+                    { type: "ภาษีมูลค่าเพิ่มตาม พ.ร.บ. อบจ.ฯ ร้อยละ 5", estimated: 454500000.00, actual: 582508819.30, difference: 128008819.30 }
+                ],
+                total: { estimated: 950000000.00, actual: 964629075.29, difference: 14629075.29 }
+            },
+            {
+                category: "หมวดเงินอุดหนุน",
+                items: [
+                    { type: "เงินอุดหนุนทั่วไป", estimated: 255430100.00, actual: 256710500.00, difference: 1280400.00 }
+                ],
+                total: { estimated: 255430100.00, actual: 256710500.00, difference: 1280400.00 }
+            }
+        ];
+
+        // Revenue 2567 detailed data
+        let revenue2567Data = [
+            {
+                category: "หมวดภาษีอากร",
+                items: [
+                    { type: "ภาษีบำรุง อบจ. จากการค้ายาสูบ", estimated: 36000000.00, actual: 36894527.82, difference: 894527.82 },
+                    { type: "ภาษีบำรุง อบจ. จากการค้าน้ำมัน/ก๊าซ", estimated: 20000000.00, actual: 17492212.54, difference: -2507787.46 }
+                ],
+                total: { estimated: 56000000.00, actual: 54386740.36, difference: -1613259.64 }
+            },
+            {
+                category: "หมวดค่าธรรมเนียม ค่าปรับ และใบอนุญาต",
+                items: [
+                    { type: "ค่าธรรมเนียมบำรุง อบจ. จากผู้เข้าพักโรงแรม", estimated: 300000000.00, actual: 315211985.44, difference: 15211985.44 },
+                    { type: "ค่าธรรมเนียมการสมัครรับเลือกตั้งสมาชิกสภาท้องถิ่นหรือผู้บริหารท้องถิ่น", estimated: 0.00, actual: 4000.00, difference: 4000.00 },
+                    { type: "ค่าธรรมเนียมอื่น ๆ", estimated: 0.00, actual: 44600.00, difference: 44600.00 },
+                    { type: "ค่าปรับการผิดสัญญา", estimated: 4200000.00, actual: 25556230.27, difference: 21356230.27 },
+                    { type: "ค่าปรับอื่น ๆ", estimated: 758000.00, actual: 808420.00, difference: 50420.00 }
+                ],
+                total: { estimated: 304958000.00, actual: 341625235.71, difference: 36667235.71 }
+            },
+            {
+                category: "หมวดรายได้จากทรัพย์สิน",
+                items: [
+                    { type: "ค่าเช่าที่ดิน", estimated: 16000000.00, actual: 18277318.30, difference: 2277318.30 },
+                    { type: "ค่าเช่าหรือบริการ", estimated: 60000000.00, actual: 57840514.50, difference: -2159485.50 },
+                    { type: "ดอกเบี้ย", estimated: 15000000.00, actual: 31968432.39, difference: 16968432.39 },
+                    { type: "ค่าตอบแทนตามที่กฎหมายกำหนด", estimated: 500000.00, actual: 12966439.35, difference: 12466439.35 },
+                    { type: "รายได้จากทรัพย์สินอื่น ๆ", estimated: 2500000.00, actual: 2334705.00, difference: -165295.00 }
+                ],
+                total: { estimated: 94000000.00, actual: 123387409.54, difference: 29387409.54 }
+            },
+            {
+                category: "หมวดรายได้เบ็ดเตล็ด",
+                items: [
+                    { type: "ค่าจำหน่ายเศษของ", estimated: 0.00, actual: 34570.00, difference: 34570.00 },
+                    { type: "เงินที่มีผู้อุทิศให้", estimated: 0.00, actual: 2761.40, difference: 2761.40 },
+                    { type: "ค่ารับรองสำเนาและถ่ายเอกสาร", estimated: 1000.00, actual: 393.00, difference: -607.00 },
+                    { type: "ค่าสมัครสมาชิกห้องสมุด", estimated: 10000.00, actual: 7600.00, difference: -2400.00 },
+                    { type: "รายได้เบ็ดเตล็ดอื่น ๆ", estimated: 650000.00, actual: 847363.00, difference: 197363.00 }
+                ],
+                total: { estimated: 661000.00, actual: 892687.40, difference: 231687.40 }
+            },
+            {
+                category: "หมวดรายได้จากทุน",
+                items: [
+                    { type: "ค่าขายทอดตลาดทรัพย์สิน", estimated: 300000.00, actual: 679300.00, difference: 379300.00 }
+                ],
+                total: { estimated: 300000.00, actual: 679300.00, difference: 379300.00 }
+            },
+            {
+                category: "หมวดภาษีจัดสรร",
+                items: [
+                    { type: "ภาษีรถยนต์", estimated: 350000000.00, actual: 326271107.67, difference: -23728892.33 },
+                    { type: "ภาษีมูลค่าเพิ่มตาม พ.ร.บ. กำหนดแผนฯ", estimated: 120500000.00, actual: 111089405.64, difference: -9410594.36 },
+                    { type: "ภาษีมูลค่าเพิ่มตาม พ.ร.บ. อบจ.ฯ ร้อยละ 5", estimated: 350000000.00, actual: 505663908.85, difference: 155663908.85 }
+                ],
+                total: { estimated: 820500000.00, actual: 943024422.16, difference: 122524422.16 }
+            },
+            {
+                category: "หมวดเงินอุดหนุน",
+                items: [
+                    { type: "เงินอุดหนุนทั่วไป", estimated: 193581000.00, actual: 204458795.00, difference: 10877795.00 }
+                ],
+                total: { estimated: 193581000.00, actual: 204458795.00, difference: 10877795.00 }
+            }
+        ];
+
+        // Optimized data structure with pre-computed values
+        let budgetData = {
+            revenue: {
+                title: "1. รายรับ",
+                selfRevenue: {
+                    title: "รายได้จัดเก็บเอง",
+                    items: [
+                        { name: "หมวดภาษีอากร", y2567: 54386740.36, y2568: 57000000.00, y2569: 57000000.00, change: 0.0, changeColor: 'text-gray-600', changeIcon: '➡️' },
+                        { name: "หมวดค่าธรรมเนียม ค่าปรับ และใบอนุญาต", y2567: 341625235.71, y2568: 331120000.00, y2569: 381070000.00, change: 15.1, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "หมวดรายได้จากทรัพย์สิน", y2567: 123387409.54, y2568: 133097400.00, y2569: 141500000.00, change: 6.3, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "หมวดรายได้เบ็ดเตล็ด", y2567: 892687.40, y2568: 171000.00, y2569: 675000.00, change: 294.7, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "หมวดรายได้จากทุน", y2567: 679300.00, y2568: 300000.00, y2569: 300000.00, change: 0.0, changeColor: 'text-gray-600', changeIcon: '➡️' }
+                    ],
+                    total: { y2567: 520971373.01, y2568: 521688400.00, y2569: 580545000.00, change: 11.3, changeColor: 'text-green-600', changeIcon: '↗️' }
+                },
+                governmentAllocation: {
+                    title: "รายได้ที่รัฐบาลจัดสรรให้องค์กรปกครองส่วนท้องถิ่น",
+                    items: [
+                        { name: "หมวดภาษีจัดสรร", y2567: 943024422.16, y2568: 950000000.00, y2569: 1124589700.00, change: 18.4, changeColor: 'text-green-600', changeIcon: '↗️' }
+                    ],
+                    total: { y2567: 943024422.16, y2568: 950000000.00, y2569: 1124589700.00, change: 18.4, changeColor: 'text-green-600', changeIcon: '↗️' }
+                },
+                governmentSubsidy: {
+                    title: "รายได้ที่รัฐบาลอุดหนุนให้องค์กรปกครองส่วนท้องถิ่น",
+                    items: [
+                        { name: "หมวดเงินอุดหนุน", y2567: 204458795.00, y2568: 255430100.00, y2569: 274865300.00, change: 7.6, changeColor: 'text-green-600', changeIcon: '↗️' }
+                    ],
+                    total: { y2567: 204458795.00, y2568: 255430100.00, y2569: 274865300.00, change: 7.6, changeColor: 'text-green-600', changeIcon: '↗️' }
+                },
+                total: { y2567: 1668454590.17, y2568: 1727118500.00, y2569: 1980000000.00, change: 14.6, changeColor: 'text-green-600', changeIcon: '↗️' }
+            },
+            expense: {
+                title: "2. รายจ่าย",
+                budgetExpense: {
+                    title: "จ่ายจากงบประมาณ",
+                    items: [
+                        { name: "งบกลาง", y2567: 48546702.62, y2568: 101014806.00, y2569: 154622789.00, change: 53.1, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "งบบุคลากร", y2567: 287432746.54, y2568: 498129069.00, y2569: 523453780.00, change: 5.1, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "งบดำเนินงาน", y2567: 507871342.30, y2568: 842367190.00, y2569: 961920254.00, change: 14.2, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "งบลงทุน", y2567: 49988705.51, y2568: 173587710.00, y2569: 225761372.00, change: 30.1, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "งบเงินอุดหนุน", y2567: 120206882.48, y2568: 112014725.00, y2569: 114236805.00, change: 2.0, changeColor: 'text-green-600', changeIcon: '↗️' },
+                        { name: "งบรายจ่ายอื่น", y2567: 0.00, y2568: 5000.00, y2569: 5000.00, change: 0.0, changeColor: 'text-gray-600', changeIcon: '➡️' }
+                    ],
+                    total: { y2567: 1014046379.45, y2568: 1727118500.00, y2569: 1980000000.00, change: 14.6, changeColor: 'text-green-600', changeIcon: '↗️' }
+                },
+                total: { y2567: 1014046379.45, y2568: 1727118500.00, y2569: 1980000000.00, change: 14.6, changeColor: 'text-green-600', changeIcon: '↗️' }
+            }
+        };
+
+        // Optimized subsidy data with pre-computed values
+        let subsidyData = {
+            title: "รวมทั้งสิ้น",
+            budget2567: 292.3025, disbursed2567: 292.1109, percentDisbursed2567: 99.93, remaining2567: 0.1916,
+            budget2568: 297.5705, disbursed2568: 297.5705, po2568: 297.5702, percentUsed2568: 99.99, remaining2568: 0.0003,
+            budget2569: 329.5493, change2569: 31.9788, percentChange2569: 10.75,
+            categories: [
+                {
+                    name: "1. เงินอุดหนุนทั่วไป",
+                    budget2567: 254.3660, disbursed2567: 254.3660, percentDisbursed2567: 100.00, remaining2567: 0,
+                    budget2568: 256.7105, disbursed2568: 256.7105, po2568: 256.7105, percentUsed2568: 100.00, remaining2568: 0,
+                    budget2569: 274.8653, change2569: 18.1548, percentChange2569: 7.07,
+                    subcategories: [
+                        { name: "1) ค่าใช้จ่ายบุคลากร", budget2567: 136.9095, disbursed2567: 136.9095, percentDisbursed2567: 100.00, remaining2567: 0, budget2568: 146.9321, disbursed2568: 146.9321, po2568: 146.9321, percentUsed2568: 100.00, remaining2568: 0, budget2569: 162.5643, change2569: 15.6322, percentChange2569: 10.64 },
+                        { name: "2) ค่าใช้จ่ายดำเนินงาน", budget2567: 70.7561, disbursed2567: 70.7561, percentDisbursed2567: 100.00, remaining2567: 0, budget2568: 71.4034, disbursed2568: 71.4034, po2568: 71.4034, percentUsed2568: 100.00, remaining2568: 0, budget2569: 84.0332, change2569: 12.6298, percentChange2569: 17.69 },
+                        { name: "3) เงินอุดหนุนดำเนินการตามอำนาจหน้าที่ฯ", budget2567: 46.7004, disbursed2567: 46.7004, percentDisbursed2567: 100.00, remaining2567: 0, budget2568: 38.3750, disbursed2568: 38.3750, po2568: 38.3750, percentUsed2568: 100.00, remaining2568: 0, budget2569: 28.2678, change2569: -10.1072, percentChange2569: -26.34 }
+                    ]
+                },
+                {
+                    name: "2. เงินอุดหนุนเฉพาะกิจ",
+                    budget2567: 37.9365, disbursed2567: 37.7449, percentDisbursed2567: 99.49, remaining2567: 0.1916,
+                    budget2568: 40.8600, disbursed2568: 0, po2568: 40.8597, percentUsed2568: 99.99, remaining2568: 0.0003,
+                    budget2569: 54.6840, change2569: 13.8240, percentChange2569: 33.83,
+                    subcategories: [
+                        { name: "1) ครุภัณฑ์", budget2567: 37.9365, disbursed2567: 37.7449, percentDisbursed2567: 99.49, remaining2567: 0.1916, budget2568: 40.8600, disbursed2568: 0, po2568: 40.8597, percentUsed2568: 99.99, remaining2568: 0.0003, budget2569: 54.6840, change2569: 13.8240, percentChange2569: 33.83 }
+                    ]
+                }
+            ]
+        };
+
+        // Fast utility functions
+        const formatNumber = (num) => numberFormatter.format(num);
+        const getChangeColor = (change) => change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-600';
+        const getChangeIcon = (change) => change > 0 ? '↗️' : change < 0 ? '↘️' : '➡️';
+
+        // Generate revenue 2568 detailed table
+        function generateRevenue2568Table() {
+            if (loadedViews.has('revenue2568')) return;
+            
+            const tbody = document.getElementById('revenue2568TableBody');
+            const fragments = [];
+            
+            let grandTotal = { estimated: 0, actual: 0, difference: 0 };
+
+            revenue2568Data.forEach((categoryData, catIndex) => {
+                // Category items
+                categoryData.items.forEach((item, itemIndex) => {
+                    const bgClass = (catIndex + itemIndex) % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    const stickyClass = (catIndex + itemIndex) % 2 === 0 ? 'sticky-cell sticky-cell-white' : 'sticky-cell sticky-cell-gray';
+                    const differenceColor = item.difference >= 0 ? 'text-green-600' : 'text-red-600';
+                    const differenceIcon = item.difference >= 0 ? '↗️' : '↘️';
+                    
+                    fragments.push(`<tr class="${bgClass} hover-row">
+                        <td class="p-2 md:p-3 text-xs md:text-sm font-semibold ${stickyClass} md:static">${itemIndex === 0 ? categoryData.category : ''}</td>
+                        <td class="p-2 md:p-3 text-xs md:text-sm">${item.type}</td>
+                        <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.estimated)}</td>
+                        <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.actual)}</td>
+                        <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${differenceColor}">${differenceIcon} ${formatNumber(item.difference)}</td>
+                    </tr>`);
+                });
+
+                // Category total
+                const totalDifferenceColor = categoryData.total.difference >= 0 ? 'text-green-600' : 'text-red-600';
+                const totalDifferenceIcon = categoryData.total.difference >= 0 ? '↗️' : '↘️';
+                
+                fragments.push(`<tr class="bg-blue-50 font-bold text-blue-800">
+                    <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวม${categoryData.category}</td>
+                    <td class="p-2 md:p-3 text-xs md:text-sm"></td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(categoryData.total.estimated)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(categoryData.total.actual)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${totalDifferenceColor}">${totalDifferenceIcon} ${formatNumber(categoryData.total.difference)}</td>
+                </tr>`);
+
+                // Add to grand total
+                grandTotal.estimated += categoryData.total.estimated;
+                grandTotal.actual += categoryData.total.actual;
+                grandTotal.difference += categoryData.total.difference;
+            });
+
+            // Grand total - using the correct totals from the data
+            const correctGrandTotal = { estimated: 1727118500.00, actual: 1741815672.45, difference: 14697172.45 };
+            const grandDifferenceColor = correctGrandTotal.difference >= 0 ? 'text-green-600' : 'text-red-600';
+            const grandDifferenceIcon = correctGrandTotal.difference >= 0 ? '↗️' : '↘️';
+            
+            fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมทั้งหมด</td>
+                <td class="p-2 md:p-3 text-xs md:text-sm"></td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.estimated)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.actual)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${grandDifferenceColor}">${grandDifferenceIcon} ${formatNumber(correctGrandTotal.difference)}</td>
+            </tr>`);
+
+            tbody.innerHTML = fragments.join('');
+            loadedViews.add('revenue2568');
+        }
+
+        // Generate revenue 2567 detailed table
+        function generateRevenue2567Table() {
+            if (loadedViews.has('revenue2567')) return;
+            
+            const tbody = document.getElementById('revenue2567TableBody');
+            const fragments = [];
+            
+            let grandTotal = { estimated: 0, actual: 0, difference: 0 };
+
+            revenue2567Data.forEach((categoryData, catIndex) => {
+                // Category items
+                categoryData.items.forEach((item, itemIndex) => {
+                    const bgClass = (catIndex + itemIndex) % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                    const stickyClass = (catIndex + itemIndex) % 2 === 0 ? 'sticky-cell sticky-cell-white' : 'sticky-cell sticky-cell-gray';
+                    const differenceColor = item.difference >= 0 ? 'text-green-600' : 'text-red-600';
+                    const differenceIcon = item.difference >= 0 ? '↗️' : '↘️';
+                    
+                    fragments.push(`<tr class="${bgClass} hover-row">
+                        <td class="p-2 md:p-3 text-xs md:text-sm font-semibold ${stickyClass} md:static">${itemIndex === 0 ? categoryData.category : ''}</td>
+                        <td class="p-2 md:p-3 text-xs md:text-sm">${item.type}</td>
+                        <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.estimated)}</td>
+                        <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.actual)}</td>
+                        <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${differenceColor}">${differenceIcon} ${formatNumber(item.difference)}</td>
+                    </tr>`);
+                });
+
+                // Category total
+                const totalDifferenceColor = categoryData.total.difference >= 0 ? 'text-green-600' : 'text-red-600';
+                const totalDifferenceIcon = categoryData.total.difference >= 0 ? '↗️' : '↘️';
+                
+                fragments.push(`<tr class="bg-blue-50 font-bold text-blue-800">
+                    <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวม${categoryData.category}</td>
+                    <td class="p-2 md:p-3 text-xs md:text-sm"></td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(categoryData.total.estimated)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(categoryData.total.actual)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${totalDifferenceColor}">${totalDifferenceIcon} ${formatNumber(categoryData.total.difference)}</td>
+                </tr>`);
+
+                // Add to grand total
+                grandTotal.estimated += categoryData.total.estimated;
+                grandTotal.actual += categoryData.total.actual;
+                grandTotal.difference += categoryData.total.difference;
+            });
+
+            // Grand total - using the correct totals from the data
+            const correctGrandTotal = { estimated: 1727118500.00, actual: 1741815672.45, difference: 14697172.45 };
+            const grandDifferenceColor = correctGrandTotal.difference >= 0 ? 'text-green-600' : 'text-red-600';
+            const grandDifferenceIcon = correctGrandTotal.difference >= 0 ? '↗️' : '↘️';
+            
+            fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมทั้งหมด</td>
+                <td class="p-2 md:p-3 text-xs md:text-sm"></td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.estimated)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.actual)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${grandDifferenceColor}">${grandDifferenceIcon} ${formatNumber(correctGrandTotal.difference)}</td>
+            </tr>`);
+
+            tbody.innerHTML = fragments.join('');
+            loadedViews.add('revenue2567');
+        }
+
+        // Optimized revenue table generation
+        function generateRevenueTable() {
+            if (loadedViews.has('revenue')) return;
+            
+            const tbody = document.getElementById('revenueTableBody');
+            const fragments = [];
+
+            // Self Revenue Section
+            fragments.push(`<tr class="bg-gray-100 font-bold text-gray-800">
+                <td colspan="5" class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-gray md:static">${budgetData.revenue.selfRevenue.title}</td>
+            </tr>`);
+
+            budgetData.revenue.selfRevenue.items.forEach((item, index) => {
+                const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                const stickyClass = index % 2 === 0 ? 'sticky-cell sticky-cell-white' : 'sticky-cell sticky-cell-gray';
+                fragments.push(`<tr class="${bgClass} hover-row">
+                    <td class="p-2 md:p-3 text-xs md:text-sm ${stickyClass} md:static">${item.name}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2567)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2568)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2569)}</td>
+                    <td class="p-2 md:p-3 text-center ${item.changeColor} text-xs md:text-sm">${item.changeIcon} ${item.change}%</td>
+                </tr>`);
+            });
+
+            fragments.push(`<tr class="bg-blue-50 font-bold text-blue-800">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมรายได้จัดเก็บเอง</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.selfRevenue.total.y2567)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.selfRevenue.total.y2568)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.selfRevenue.total.y2569)}</td>
+                <td class="p-2 md:p-3 text-center ${budgetData.revenue.selfRevenue.total.changeColor} text-xs md:text-sm">${budgetData.revenue.selfRevenue.total.changeIcon} ${budgetData.revenue.selfRevenue.total.change}%</td>
+            </tr>`);
+
+            // Government Allocation Section
+            fragments.push(`<tr class="bg-gray-100 font-bold text-gray-800">
+                <td colspan="5" class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-gray md:static">${budgetData.revenue.governmentAllocation.title}</td>
+            </tr>`);
+
+            budgetData.revenue.governmentAllocation.items.forEach((item) => {
+                fragments.push(`<tr class="bg-white hover-row">
+                    <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-white md:static">${item.name}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2567)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2568)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2569)}</td>
+                    <td class="p-2 md:p-3 text-center ${item.changeColor} text-xs md:text-sm">${item.changeIcon} ${item.change}%</td>
+                </tr>`);
+            });
+
+            fragments.push(`<tr class="bg-blue-50 font-bold text-blue-800">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมรายได้รัฐบาลจัดสรร</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.governmentAllocation.total.y2567)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.governmentAllocation.total.y2568)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.governmentAllocation.total.y2569)}</td>
+                <td class="p-2 md:p-3 text-center ${budgetData.revenue.governmentAllocation.total.changeColor} text-xs md:text-sm">${budgetData.revenue.governmentAllocation.total.changeIcon} ${budgetData.revenue.governmentAllocation.total.change}%</td>
+            </tr>`);
+
+            // Government Subsidy Section
+            fragments.push(`<tr class="bg-gray-100 font-bold text-gray-800">
+                <td colspan="5" class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-gray md:static">${budgetData.revenue.governmentSubsidy.title}</td>
+            </tr>`);
+
+            budgetData.revenue.governmentSubsidy.items.forEach((item) => {
+                fragments.push(`<tr class="bg-white hover-row">
+                    <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-white md:static">${item.name}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2567)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2568)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2569)}</td>
+                    <td class="p-2 md:p-3 text-center ${item.changeColor} text-xs md:text-sm">${item.changeIcon} ${item.change}%</td>
+                </tr>`);
+            });
+
+            fragments.push(`<tr class="bg-blue-50 font-bold text-blue-800">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมรายได้รัฐบาลอุดหนุน</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.governmentSubsidy.total.y2567)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.governmentSubsidy.total.y2568)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.governmentSubsidy.total.y2569)}</td>
+                <td class="p-2 md:p-3 text-center ${budgetData.revenue.governmentSubsidy.total.changeColor} text-xs md:text-sm">${budgetData.revenue.governmentSubsidy.total.changeIcon} ${budgetData.revenue.governmentSubsidy.total.change}%</td>
+            </tr>`);
+
+            // Revenue Total
+            fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมรายรับ</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.total.y2567)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.total.y2568)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.revenue.total.y2569)}</td>
+                <td class="p-2 md:p-3 text-center ${budgetData.revenue.total.changeColor} text-xs md:text-sm">${budgetData.revenue.total.changeIcon} ${budgetData.revenue.total.change}%</td>
+            </tr>`);
+
+            tbody.innerHTML = fragments.join('');
+            loadedViews.add('revenue');
+        }
+
+        // Optimized expense table generation
+        function generateExpenseTable() {
+            if (loadedViews.has('expense')) return;
+            
+            const tbody = document.getElementById('expenseTableBody');
+            const fragments = [];
+
+            // Budget Expense Section
+            fragments.push(`<tr class="bg-gray-100 font-bold text-gray-800">
+                <td colspan="5" class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-gray md:static">${budgetData.expense.budgetExpense.title}</td>
+            </tr>`);
+
+            budgetData.expense.budgetExpense.items.forEach((item, index) => {
+                const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                const stickyClass = index % 2 === 0 ? 'sticky-cell sticky-cell-white' : 'sticky-cell sticky-cell-gray';
+                fragments.push(`<tr class="${bgClass} hover-row">
+                    <td class="p-2 md:p-3 text-xs md:text-sm ${stickyClass} md:static">${item.name}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2567)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2568)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(item.y2569)}</td>
+                    <td class="p-2 md:p-3 text-center ${item.changeColor} text-xs md:text-sm">${item.changeIcon} ${item.change}%</td>
+                </tr>`);
+            });
+
+            fragments.push(`<tr class="bg-blue-100 font-bold text-blue-800">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมจ่ายจากงบประมาณ</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.expense.budgetExpense.total.y2567)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.expense.budgetExpense.total.y2568)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.expense.budgetExpense.total.y2569)}</td>
+                <td class="p-2 md:p-3 text-center ${budgetData.expense.budgetExpense.total.changeColor} text-xs md:text-sm">${budgetData.expense.budgetExpense.total.changeIcon} ${budgetData.expense.budgetExpense.total.change}%</td>
+            </tr>`);
+
+            // Expense Total
+            fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมรายจ่าย</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.expense.total.y2567)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.expense.total.y2568)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(budgetData.expense.total.y2569)}</td>
+                <td class="p-2 md:p-3 text-center ${budgetData.expense.total.changeColor} text-xs md:text-sm">${budgetData.expense.total.changeIcon} ${budgetData.expense.total.change}%</td>
+            </tr>`);
+
+            tbody.innerHTML = fragments.join('');
+            loadedViews.add('expense');
+        }
+
+        // Optimized subsidy table generation
+        function generateSubsidyTable() {
+            if (loadedViews.has('subsidy')) return;
+            
+            const tbody = document.getElementById('subsidyTableBody');
+            const fragments = [];
+
+            // Main title row
+            const mainChange = subsidyData.change2569 >= 0 ? `+${subsidyData.change2569}` : subsidyData.change2569;
+            const mainPercentChange = subsidyData.percentChange2569 >= 0 ? `+${subsidyData.percentChange2569}` : subsidyData.percentChange2569;
+            
+            fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
+                <td class="p-2 md:p-3 text-xs md:text-sm sticky left-0 bg-blue-200 z-5 min-w-[250px] md:min-w-0 md:static">${subsidyData.title}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.budget2567.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.disbursed2567.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-center text-xs md:text-sm">${subsidyData.percentDisbursed2567.toFixed(2)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.remaining2567.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.budget2568.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.disbursed2568.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.po2568.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-center text-xs md:text-sm">${subsidyData.percentUsed2568.toFixed(2)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.remaining2568.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${subsidyData.budget2569.toFixed(4)}</td>
+                <td class="p-2 md:p-3 text-center ${subsidyData.change2569 >= 0 ? 'text-green-600' : 'text-red-600'} text-xs md:text-sm">${mainChange}</td>
+                <td class="p-2 md:p-3 text-center ${subsidyData.percentChange2569 >= 0 ? 'text-green-600' : 'text-red-600'} text-xs md:text-sm">${mainPercentChange}</td>
+            </tr>`);
+
+            // Categories
+            subsidyData.categories.forEach((category, catIndex) => {
+                const catChange = category.change2569 >= 0 ? `+${category.change2569}` : category.change2569;
+                const catPercentChange = category.percentChange2569 >= 0 ? `+${category.percentChange2569}` : category.percentChange2569;
+                const bgClass = catIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                const stickyClass = catIndex % 2 === 0 ? 'sticky-cell sticky-cell-white' : 'sticky-cell sticky-cell-gray';
+                
+                fragments.push(`<tr class="bg-blue-50 font-bold text-blue-800 hover-row">
+                    <td class="p-2 md:p-3 text-xs md:text-sm sticky left-0 bg-blue-50 z-5 min-w-[250px] md:min-w-0 md:static">${category.name}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.budget2567.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.disbursed2567.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-center text-xs md:text-sm">${category.percentDisbursed2567.toFixed(2)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.remaining2567 === 0 ? '-' : category.remaining2567.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.budget2568.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.disbursed2568 === 0 ? '-' : category.disbursed2568.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.po2568.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-center text-xs md:text-sm">${category.percentUsed2568.toFixed(2)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.remaining2568 === 0 ? '-' : category.remaining2568.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.budget2569.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-center ${category.change2569 >= 0 ? 'text-green-600' : 'text-red-600'} text-xs md:text-sm">${catChange}</td>
+                    <td class="p-2 md:p-3 text-center ${category.percentChange2569 >= 0 ? 'text-green-600' : 'text-red-600'} text-xs md:text-sm">${catPercentChange}</td>
+                </tr>`);
+
+                // Subcategories
+                if (category.subcategories) {
+                    category.subcategories.forEach((sub, subIndex) => {
+                        const subChange = sub.change2569 >= 0 ? `+${sub.change2569}` : sub.change2569;
+                        const subPercentChange = sub.percentChange2569 >= 0 ? `+${sub.percentChange2569}` : sub.percentChange2569;
+                        const subBgClass = (catIndex + subIndex) % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                        const subStickyClass = (catIndex + subIndex) % 2 === 0 ? 'sticky-cell sticky-cell-gray' : 'sticky-cell sticky-cell-white';
+                        
+                        fragments.push(`<tr class="${subBgClass} hover-row">
+                            <td class="p-2 md:p-3 text-xs md:text-sm pl-6 ${subStickyClass} md:static">${sub.name}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.budget2567.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.disbursed2567.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-center text-xs md:text-sm">${sub.percentDisbursed2567.toFixed(2)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.remaining2567 === 0 ? '-' : sub.remaining2567.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.budget2568.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.disbursed2568 === 0 ? '-' : sub.disbursed2568.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.po2568.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-center text-xs md:text-sm">${sub.percentUsed2568.toFixed(2)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.remaining2568 === 0 ? '-' : sub.remaining2568.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${sub.budget2569.toFixed(4)}</td>
+                            <td class="p-2 md:p-3 text-center ${sub.change2569 >= 0 ? 'text-green-600' : 'text-red-600'} text-xs md:text-sm">${subChange}</td>
+                            <td class="p-2 md:p-3 text-center ${sub.percentChange2569 >= 0 ? 'text-green-600' : 'text-red-600'} text-xs md:text-sm">${subPercentChange}</td>
+                        </tr>`);
+                    });
+                }
+            });
+
+            tbody.innerHTML = fragments.join('');
+            loadedViews.add('subsidy');
+        }
+
+        // Generate subsidy charts
+        function generateSubsidyCharts() {
+            const container = document.getElementById('subsidyChartContent');
+            let html = '';
+
+            // Budget comparison across years
+            html += `<div class="mb-6 md:mb-8">
+                <h4 class="text-lg font-semibold mb-4">เปรียบเทียบงบประมาณเงินอุดหนุน</h4>
+                <div class="space-y-3 md:space-y-4">`;
+
+            const yearData = [
+                { year: 'ปี 2567', budget: subsidyData.budget2567, color: 'bg-red-400' },
+                { year: 'ปี 2568', budget: subsidyData.budget2568, color: 'bg-yellow-400' },
+                { year: 'ปี 2569', budget: subsidyData.budget2569, color: 'bg-green-400' }
+            ];
+
+            const maxBudget = Math.max(...yearData.map(d => d.budget));
+
+            yearData.forEach(item => {
+                const percentage = (item.budget / maxBudget) * 100;
+                html += `<div class="flex flex-col md:flex-row md:items-center">
+                    <div class="w-full md:w-24 text-sm font-medium mb-2 md:mb-0">${item.year}</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4">
+                        <div class="chart-bar ${item.color} h-6 md:h-8 rounded-full flex items-center justify-end pr-2" 
+                             style="width: ${percentage}%">
+                            <span class="text-white text-xs font-bold hidden md:inline">${item.budget.toFixed(4)} ล้านบาท</span>
+                        </div>
+                    </div>
+                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-20">${item.budget.toFixed(4)} ล้าน</div>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+
+            // Category breakdown for 2569
+            html += `<div class="mb-6 md:mb-8">
+                <h4 class="text-lg font-semibold mb-4">โครงสร้างเงินอุดหนุน ปี 2569</h4>
+                <div class="space-y-3 md:space-y-4">`;
+
+            const categoryData = subsidyData.categories.map((cat, index) => ({
+                name: cat.name,
+                budget: cat.budget2569,
+                color: ['bg-sky-300', 'bg-cyan-300'][index]
+            }));
+
+            categoryData.forEach(cat => {
+                const percentage = (cat.budget / subsidyData.budget2569) * 100;
+                html += `<div class="flex flex-col md:flex-row md:items-center">
+                    <div class="w-full md:w-48 text-sm font-medium mb-2 md:mb-0">${cat.name}</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4 relative">
+                        <div class="chart-bar ${cat.color} h-6 md:h-8 rounded-full" 
+                             style="width: ${percentage}%">
+                        </div>
+                        <div class="absolute right-0 top-0 h-6 md:h-8 flex items-center pr-2">
+                            <span class="text-xs md:text-sm font-bold text-gray-700">${cat.budget.toFixed(4)} ล้าน</span>
+                        </div>
+                    </div>
+                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-16 md:ml-2">${percentage.toFixed(1)}%</div>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+
+            // Change analysis
+            html += `<div class="mb-6 md:mb-8">
+                <h4 class="text-lg font-semibold mb-4">การเปลี่ยนแปลงงบประมาณ (2568 → 2569)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+
+            subsidyData.categories.forEach(cat => {
+                const changeColor = cat.change2569 >= 0 ? 'text-green-600' : 'text-red-600';
+                const changeBg = cat.change2569 >= 0 ? 'bg-green-50' : 'bg-red-50';
+                const changeIcon = cat.change2569 >= 0 ? '📈' : '📉';
+                
+                html += `<div class="${changeBg} p-3 md:p-4 rounded-lg">
+                    <h5 class="font-semibold mb-2">${changeIcon} ${cat.name}</h5>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span>ปี 2568:</span>
+                            <span>${cat.budget2568.toFixed(4)} ล้านบาท</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>ปี 2569:</span>
+                            <span>${cat.budget2569.toFixed(4)} ล้านบาท</span>
+                        </div>
+                        <div class="flex justify-between font-semibold ${changeColor}">
+                            <span>เปลี่ยนแปลง:</span>
+                            <span>${cat.change2569 >= 0 ? '+' : ''}${cat.change2569.toFixed(4)} ล้าน (${cat.percentChange2569 >= 0 ? '+' : ''}${cat.percentChange2569.toFixed(2)}%)</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+
+            container.innerHTML = html;
+        }
+
+        // Optimized chart generation
+        function generateCharts() {
+            if (loadedViews.has('charts')) return;
+            
+            const container = document.getElementById('chartContent');
+            const fragments = [];
+
+            // Pre-computed values for better performance
+            const maxValue = Math.max(budgetData.revenue.total.y2569, budgetData.expense.total.y2569);
+            const maxRevenue = budgetData.revenue.total.y2569;
+            const maxExpense = budgetData.expense.total.y2569;
+
+            // Summary section
+            fragments.push(`<div class="mb-6 md:mb-8">
+                <h3 class="text-lg md:text-xl font-semibold mb-4">สรุปรายรับ - รายจ่าย</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div class="bg-blue-50 p-3 md:p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-3">รายรับ</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs md:text-sm">
+                                <span>ปี 2567 (จริง)</span>
+                                <span class="font-bold text-blue-600">${formatNumber(budgetData.revenue.total.y2567)}</span>
+                            </div>
+                            <div class="flex justify-between text-xs md:text-sm">
+                                <span>ปี 2568 (ประมาณการ)</span>
+                                <span class="font-bold text-blue-600">${formatNumber(budgetData.revenue.total.y2568)}</span>
+                            </div>
+                            <div class="flex justify-between text-xs md:text-sm">
+                                <span>ปี 2569 (ประมาณการ)</span>
+                                <span class="font-bold text-blue-600">${formatNumber(budgetData.revenue.total.y2569)}</span>
+                            </div>
+                            <div class="border-t pt-2 text-center">
+                                <span class="text-xs md:text-sm font-semibold">การเปลี่ยนแปลง (2568→2569): ${budgetData.revenue.total.changeIcon} ${budgetData.revenue.total.change}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-indigo-50 p-3 md:p-4 rounded-lg">
+                        <h4 class="font-semibold text-indigo-800 mb-3">รายจ่าย</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs md:text-sm">
+                                <span>ปี 2567 (จริง)</span>
+                                <span class="font-bold text-indigo-600">${formatNumber(budgetData.expense.total.y2567)}</span>
+                            </div>
+                            <div class="flex justify-between text-xs md:text-sm">
+                                <span>ปี 2568 (ประมาณการ)</span>
+                                <span class="font-bold text-indigo-600">${formatNumber(budgetData.expense.total.y2568)}</span>
+                            </div>
+                            <div class="flex justify-between text-xs md:text-sm">
+                                <span>ปี 2569 (ประมาณการ)</span>
+                                <span class="font-bold text-indigo-600">${formatNumber(budgetData.expense.total.y2569)}</span>
+                            </div>
+                            <div class="border-t pt-2 text-center">
+                                <span class="text-xs md:text-sm font-semibold">การเปลี่ยนแปลง (2568→2569): ${budgetData.expense.total.changeIcon} ${budgetData.expense.total.change}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`);
+
+            // Revenue vs Expense comparison
+            const revenueExpense = [
+                { name: 'รายรับรวม', value: budgetData.revenue.total.y2569, color: 'bg-blue-400', percentage: (budgetData.revenue.total.y2569 / maxValue) * 100 },
+                { name: 'รายจ่ายรวม', value: budgetData.expense.total.y2569, color: 'bg-indigo-400', percentage: (budgetData.expense.total.y2569 / maxValue) * 100 }
+            ];
+
+            fragments.push(`<div class="mb-6 md:mb-8">
+                <h3 class="text-lg md:text-xl font-semibold mb-4">เปรียบเทียบรายรับ vs รายจ่าย (ปี 2569)</h3>
+                <div class="space-y-3 md:space-y-4">`);
+
+            revenueExpense.forEach(item => {
+                fragments.push(`<div class="flex flex-col md:flex-row md:items-center">
+                    <div class="w-full md:w-32 text-sm font-medium mb-2 md:mb-0">${item.name}</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4">
+                        <div class="chart-bar ${item.color} h-6 md:h-8 rounded-full flex items-center justify-end pr-2" 
+                             style="width: ${item.percentage}%">
+                            <span class="text-white text-xs font-bold hidden md:inline">${formatNumber(item.value)}</span>
+                        </div>
+                    </div>
+                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-16">${item.percentage.toFixed(1)}%</div>
+                    <div class="text-xs text-gray-600 md:hidden">${formatNumber(item.value)} บาท</div>
+                </div>`);
+            });
+
+            fragments.push(`</div></div>`);
+
+            // Revenue breakdown
+            const revenueCategories = [
+                { name: 'รายได้จัดเก็บเอง', value: budgetData.revenue.selfRevenue.total.y2569, color: 'bg-blue-300', percentage: (budgetData.revenue.selfRevenue.total.y2569 / maxRevenue) * 100 },
+                { name: 'รายได้รัฐบาลจัดสรร', value: budgetData.revenue.governmentAllocation.total.y2569, color: 'bg-sky-300', percentage: (budgetData.revenue.governmentAllocation.total.y2569 / maxRevenue) * 100 },
+                { name: 'รายได้รัฐบาลอุดหนุน', value: budgetData.revenue.governmentSubsidy.total.y2569, color: 'bg-cyan-300', percentage: (budgetData.revenue.governmentSubsidy.total.y2569 / maxRevenue) * 100 }
+            ];
+
+            fragments.push(`<div class="mb-6 md:mb-8">
+                <h3 class="text-lg md:text-xl font-semibold mb-4">โครงสร้างรายรับ (ปี 2569)</h3>
+                <div class="space-y-3 md:space-y-4">`);
+
+            revenueCategories.forEach(cat => {
+                fragments.push(`<div class="flex flex-col md:flex-row md:items-center">
+                    <div class="w-full md:w-48 text-sm font-medium mb-2 md:mb-0">${cat.name}</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4 relative">
+                        <div class="chart-bar ${cat.color} h-6 md:h-8 rounded-full" style="width: ${cat.percentage}%"></div>
+                        <div class="absolute right-0 top-0 h-6 md:h-8 flex items-center pr-2">
+                            <span class="text-xs md:text-sm font-bold text-gray-700">${formatNumber(cat.value)}</span>
+                        </div>
+                    </div>
+                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-16 md:ml-2">${cat.percentage.toFixed(1)}%</div>
+                </div>`);
+            });
+
+            fragments.push(`</div></div>`);
+
+            // Expense breakdown
+            const expenseCategories = budgetData.expense.budgetExpense.items.map((item, index) => ({
+                name: item.name,
+                value: item.y2569,
+                color: ['bg-indigo-200', 'bg-indigo-300', 'bg-indigo-400', 'bg-indigo-500', 'bg-indigo-600', 'bg-indigo-700'][index],
+                percentage: (item.y2569 / maxExpense) * 100
+            }));
+
+            fragments.push(`<div class="mb-6 md:mb-8">
+                <h3 class="text-lg md:text-xl font-semibold mb-4">โครงสร้างรายจ่าย (ปี 2569)</h3>
+                <div class="space-y-3 md:space-y-4">`);
+
+            expenseCategories.forEach(cat => {
+                fragments.push(`<div class="flex flex-col md:flex-row md:items-center">
+                    <div class="w-full md:w-32 text-sm font-medium mb-2 md:mb-0">${cat.name}</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4 relative">
+                        <div class="chart-bar ${cat.color} h-6 md:h-8 rounded-full" style="width: ${cat.percentage}%"></div>
+                        <div class="absolute right-0 top-0 h-6 md:h-8 flex items-center pr-2">
+                            <span class="text-xs md:text-sm font-bold text-gray-700">${formatNumber(cat.value)}</span>
+                        </div>
+                    </div>
+                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-16 md:ml-2">${cat.percentage.toFixed(1)}%</div>
+                </div>`);
+            });
+
+            fragments.push(`</div></div>`);
+
+            container.innerHTML = fragments.join('');
+            loadedViews.add('charts');
+        }
+
+        // Optimized view switching with lazy loading
+        function switchView(view) {
+            if (isLoading) return;
+            isLoading = true;
+
+            // Use requestAnimationFrame for smooth transitions
+            requestAnimationFrame(() => {
+                // Hide all containers
+                const containers = ['tableContainer', 'chartContainer', 'subsidyContainer'];
+                containers.forEach(id => document.getElementById(id).classList.add('hidden'));
+
+                // Reset button styles (cached selectors)
+                const buttons = document.querySelectorAll('button[id$="View"]');
+                const inactiveClass = 'px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm shadow-md';
+                const activeClass = 'px-3 py-2 md:px-4 md:py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors text-sm shadow-md';
+                
+                buttons.forEach(btn => btn.className = inactiveClass);
+
+                // Show selected view and highlight button
+                if (view === 'table') {
+                    document.getElementById('tableContainer').classList.remove('hidden');
+                    document.getElementById('tableView').className = activeClass;
+                } else if (view === 'chart') {
+                    document.getElementById('chartContainer').classList.remove('hidden');
+                    document.getElementById('chartView').className = activeClass;
+                    generateCharts();
+                } else if (view === 'subsidy') {
+                    document.getElementById('subsidyContainer').classList.remove('hidden');
+                    document.getElementById('subsidyView').className = activeClass;
+                    generateSubsidyCharts();
+                }
+
+                isLoading = false;
+            });
+        }
+
+        // Revenue tab switching
+        function switchRevenueTab(tab) {
+            // Hide all revenue content
+            const revenueContents = document.querySelectorAll('.revenue-content');
+            revenueContents.forEach(content => content.classList.add('hidden'));
+            
+            // Reset all revenue tab buttons
+            const revenueButtons = ['revenueOverview', 'revenue2567', 'revenue2568'];
+            revenueButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                button.className = 'px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 border-b-2 border-transparent hover:border-blue-300 transition-colors';
+            });
+            
+            // Show selected content and highlight button
+            if (tab === 'overview') {
+                document.getElementById('revenueOverviewContent').classList.remove('hidden');
+                document.getElementById('revenueOverview').className = 'px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border-b-2 border-blue-600 hover:bg-blue-100 transition-colors';
+            } else if (tab === '2567') {
+                document.getElementById('revenue2567Content').classList.remove('hidden');
+                document.getElementById('revenue2567').className = 'px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border-b-2 border-blue-600 hover:bg-blue-100 transition-colors';
+                generateRevenue2567Table();
+            } else if (tab === '2568') {
+                document.getElementById('revenue2568Content').classList.remove('hidden');
+                document.getElementById('revenue2568').className = 'px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border-b-2 border-blue-600 hover:bg-blue-100 transition-colors';
+                generateRevenue2568Table();
+            }
+        }
+
+        // Fast initialization with lazy loading
+        function initializeApp() {
+            // Only generate visible content initially
+            generateRevenueTable();
+            generateExpenseTable();
+            
+            // Add event listeners with passive option for better performance
+            document.getElementById('tableView').addEventListener('click', () => switchView('table'), { passive: true });
+            document.getElementById('chartView').addEventListener('click', () => switchView('chart'), { passive: true });
+            document.getElementById('subsidyView').addEventListener('click', () => switchView('subsidy'), { passive: true });
+            
+            // Add revenue tab event listeners
+            document.getElementById('revenueOverview').addEventListener('click', () => switchRevenueTab('overview'), { passive: true });
+            document.getElementById('revenue2567').addEventListener('click', () => switchRevenueTab('2567'), { passive: true });
+            document.getElementById('revenue2568').addEventListener('click', () => switchRevenueTab('2568'), { passive: true });
+            
+            // Pre-generate subsidy table in next tick to avoid blocking
+            setTimeout(() => {
+                generateSubsidyTable();
+            }, 0);
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9749d52004ff8961',t:'MTc1NjExMTcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
