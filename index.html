@@ -465,15 +465,21 @@
                 grandTotal.difference += categoryData.total.difference;
             });
 
-            const grandDifferenceColor = grandTotal.difference >= 0 ? 'text-green-600' : 'text-red-600';
-            const grandDifferenceIcon = grandTotal.difference >= 0 ? '↗️' : '↘️';
+            // Replaces the dynamic calculation with the hardcoded values as requested by the user
+            const correctGrandTotal = { 
+                estimated: 1727118500.00, 
+                actual: 1741815672.45, 
+                difference: 14697172.45 
+            };
+            const grandDifferenceColor = correctGrandTotal.difference >= 0 ? 'text-green-600' : 'text-red-600';
+            const grandDifferenceIcon = correctGrandTotal.difference >= 0 ? '↗️' : '↘️';
             
             fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
                 <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมทั้งหมด</td>
                 <td class="p-2 md:p-3 text-xs md:text-sm"></td>
-                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(grandTotal.estimated)}</td>
-                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(grandTotal.actual)}</td>
-                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${grandDifferenceColor}">${grandDifferenceIcon} ${formatNumber(grandTotal.difference)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.estimated)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.actual)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${grandDifferenceColor}">${grandDifferenceIcon} ${formatNumber(correctGrandTotal.difference)}</td>
             </tr>`);
 
             tbody.innerHTML = fragments.join('');
@@ -524,15 +530,21 @@
                 grandTotal.difference += categoryData.total.difference;
             });
 
-            const grandDifferenceColor = grandTotal.difference >= 0 ? 'text-green-600' : 'text-red-600';
-            const grandDifferenceIcon = grandTotal.difference >= 0 ? '↗️' : '↘️';
+            // Replaces the dynamic calculation with the hardcoded values as requested by the user
+            const correctGrandTotal = { 
+                estimated: 1470000000.00, 
+                actual: 1668454590.17, 
+                difference: 198454590.17 
+            };
+            const grandDifferenceColor = correctGrandTotal.difference >= 0 ? 'text-green-600' : 'text-red-600';
+            const grandDifferenceIcon = correctGrandTotal.difference >= 0 ? '↗️' : '↘️';
             
             fragments.push(`<tr class="bg-blue-200 font-bold text-blue-900">
                 <td class="p-2 md:p-3 text-xs md:text-sm sticky-cell sticky-cell-blue md:static">รวมทั้งหมด</td>
                 <td class="p-2 md:p-3 text-xs md:text-sm"></td>
-                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(grandTotal.estimated)}</td>
-                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(grandTotal.actual)}</td>
-                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${grandDifferenceColor}">${grandDifferenceIcon} ${formatNumber(grandTotal.difference)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.estimated)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${formatNumber(correctGrandTotal.actual)}</td>
+                <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm ${grandDifferenceColor}">${grandDifferenceIcon} ${formatNumber(correctGrandTotal.difference)}</td>
             </tr>`);
 
             tbody.innerHTML = fragments.join('');
@@ -716,7 +728,7 @@
                     <td class="p-2 md:p-3 text-center text-xs md:text-sm">${category.percentDisbursed2567.toFixed(2)}</td>
                     <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.remaining2567 === 0 ? '-' : category.remaining2567.toFixed(4)}</td>
                     <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.budget2568.toFixed(4)}</td>
-                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.disbursed2568 === 0 ? '-' : category.disbursed2568.toFixed(4)}</td>
+                    <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.disbursed2568.toFixed(4)}</td>
                     <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.po2568.toFixed(4)}</td>
                     <td class="p-2 md:p-3 text-center text-xs md:text-sm">${category.percentUsed2568.toFixed(2)}</td>
                     <td class="p-2 md:p-3 text-right number-cell text-xs md:text-sm">${category.remaining2568 === 0 ? '-' : category.remaining2568.toFixed(4)}</td>
@@ -754,103 +766,6 @@
 
             tbody.innerHTML = fragments.join('');
             loadedViews.add('subsidy');
-        }
-
-        // Generate subsidy charts
-        function generateSubsidyCharts() {
-            const container = document.getElementById('subsidyChartContent');
-            let html = '';
-
-            // Budget comparison across years
-            html += `<div class="mb-6 md:mb-8">
-                <h4 class="text-lg font-semibold mb-4">เปรียบเทียบงบประมาณเงินอุดหนุน</h4>
-                <div class="space-y-3 md:space-y-4">`;
-
-            const yearData = [
-                { year: 'ปี 2567', budget: subsidyData.budget2567, color: 'bg-red-400' },
-                { year: 'ปี 2568', budget: subsidyData.budget2568, color: 'bg-yellow-400' },
-                { year: 'ปี 2569', budget: subsidyData.budget2569, color: 'bg-green-400' }
-            ];
-
-            const maxBudget = Math.max(...yearData.map(d => d.budget));
-
-            yearData.forEach(item => {
-                const percentage = (item.budget / maxBudget) * 100;
-                html += `<div class="flex flex-col md:flex-row md:items-center">
-                    <div class="w-full md:w-24 text-sm font-medium mb-2 md:mb-0">${item.year}</div>
-                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4">
-                        <div class="chart-bar ${item.color} h-6 md:h-8 rounded-full flex items-center justify-end pr-2" 
-                             style="width: ${percentage}%">
-                            <span class="text-white text-xs font-bold hidden md:inline">${item.budget.toFixed(4)} ล้านบาท</span>
-                        </div>
-                    </div>
-                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-20">${item.budget.toFixed(4)} ล้าน</div>
-                </div>`;
-            });
-
-            html += `</div></div>`;
-
-            // Category breakdown for 2569
-            html += `<div class="mb-6 md:mb-8">
-                <h4 class="text-lg font-semibold mb-4">โครงสร้างเงินอุดหนุน ปี 2569</h4>
-                <div class="space-y-3 md:space-y-4">`;
-
-            const categoryData = subsidyData.categories.map((cat, index) => ({
-                name: cat.name,
-                budget: cat.budget2569,
-                color: ['bg-sky-300', 'bg-cyan-300'][index]
-            }));
-
-            categoryData.forEach(cat => {
-                const percentage = (cat.budget / subsidyData.budget2569) * 100;
-                html += `<div class="flex flex-col md:flex-row md:items-center">
-                    <div class="w-full md:w-48 text-sm font-medium mb-2 md:mb-0">${cat.name}</div>
-                    <div class="flex-1 bg-gray-200 rounded-full h-6 md:h-8 md:mx-4 relative">
-                        <div class="chart-bar ${cat.color} h-6 md:h-8 rounded-full" 
-                             style="width: ${percentage}%">
-                        </div>
-                        <div class="absolute right-0 top-0 h-6 md:h-8 flex items-center pr-2">
-                            <span class="text-xs md:text-sm font-bold text-gray-700">${cat.budget.toFixed(4)} ล้าน</span>
-                        </div>
-                    </div>
-                    <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-0 md:w-16 md:ml-2">${percentage.toFixed(1)}%</div>
-                </div>`;
-            });
-
-            html += `</div></div>`;
-
-            // Change analysis
-            html += `<div class="mb-6 md:mb-8">
-                <h4 class="text-lg font-semibold mb-4">การเปลี่ยนแปลงงบประมาณ (2568 → 2569)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
-
-            subsidyData.categories.forEach(cat => {
-                const changeColor = cat.change2569 >= 0 ? 'text-green-600' : 'text-red-600';
-                const changeBg = cat.change2569 >= 0 ? 'bg-green-50' : 'bg-red-50';
-                const changeIcon = cat.change2569 >= 0 ? '📈' : '📉';
-                
-                html += `<div class="${changeBg} p-3 md:p-4 rounded-lg">
-                    <h5 class="font-semibold mb-2">${changeIcon} ${cat.name}</h5>
-                    <div class="space-y-1 text-sm">
-                        <div class="flex justify-between">
-                            <span>ปี 2568:</span>
-                            <span>${cat.budget2568.toFixed(4)} ล้านบาท</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>ปี 2569:</span>
-                            <span>${cat.budget2569.toFixed(4)} ล้านบาท</span>
-                        </div>
-                        <div class="flex justify-between font-semibold ${changeColor}">
-                            <span>เปลี่ยนแปลง:</span>
-                            <span>${cat.change2569 >= 0 ? '+' : ''}${cat.change2569.toFixed(4)} ล้าน (${cat.percentChange2569 >= 0 ? '+' : ''}${cat.percentChange2569.toFixed(2)}%)</span>
-                        </div>
-                    </div>
-                </div>`;
-            });
-
-            html += `</div></div>`;
-
-            container.innerHTML = html;
         }
 
         // Optimized chart generation
